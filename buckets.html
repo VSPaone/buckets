@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Buckets/ · Interpretation & Problem Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #111111;
+      --muted: #7a7a7a;
+      --border: #e3e3e3;
+      --accent: #111111;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, -apple-system, sans-serif;
+      --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.06);
+      --radius-card: 14px;
+      --radius-note: 12px;
+      --transition-fast: 0.15s ease-out;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--bg);
+      color: var(--fg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 1280px;
+      height: 100vh;
+      padding: 24px 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .header-kicker {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 500;
+      margin-top: 2px;
+      color: var(--fg);
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      max-width: 720px;
+      line-height: 1.5;
+    }
+
+    .canvas {
+      position: relative;
+      flex: 1;
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border);
+      background-color: #fafafa;
+      box-shadow: var(--shadow-soft);
+      padding: 26px;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .canvas::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      width: 520px;
+      height: 520px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle at center, #ffffff 0%, #f5f5f5 55%, #fafafa 100%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    /* Center node */
+
+    .node-center {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      min-width: 260px;
+      max-width: 520px;
+      padding: 12px 22px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background-color: #ffffff;
+      box-shadow: var(--shadow-soft);
+      text-align: center;
+      font-size: 10px;
+      line-height: 1.5;
+      cursor: grab;
+      z-index: 5;
+    }
+
+    .node-center:active {
+      cursor: grabbing;
+    }
+
+    .node-center-label {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+    }
+
+    .node-center-main {
+      margin-top: 1px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .node-center-note {
+      margin-top: 4px;
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    /* Generic note */
+
+    .note {
+      position: absolute;
+      max-width: 220px;
+      padding: 8px 10px;
+      border-radius: var(--radius-note);
+      border: 1px solid var(--border);
+      background-color: #ffffff;
+      box-shadow: var(--shadow-soft);
+      font-size: 9px;
+      line-height: 1.5;
+      cursor: grab;
+      transition:
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast),
+        background-color var(--transition-fast),
+        border-color var(--transition-fast);
+      z-index: 3;
+      transform: translate(-50%, -50%);
+    }
+
+    .note:active {
+      cursor: grabbing;
+      transform: translate(-50%, -50%) scale(1.02);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.10);
+    }
+
+    .note-label {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .note ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .note li {
+      margin: 1px 0;
+    }
+
+    /* Colour variants */
+
+    .note-soft-yellow {
+      background-color: #fff7e5;
+      border-color: #f5e0a8;
+    }
+
+    .note-soft-pink {
+      background-color: #ffeef5;
+      border-color: #f2c7dc;
+    }
+
+    .note-soft-blue {
+      background-color: #eef6ff;
+      border-color: #c4d8f5;
+    }
+
+    .note-soft-mint {
+      background-color: #ecfbf4;
+      border-color: #c1e8d4;
+    }
+
+    .note-strong {
+      border-color: var(--accent);
+    }
+
+    /* Connection lines */
+
+    .canvas svg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .edge {
+      stroke: #d4d4d4;
+      stroke-width: 1.2;
+      stroke-linecap: round;
+    }
+
+    .edge-strong {
+      stroke: #b3b3b3;
+      stroke-width: 1.7;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 900px) {
+      .wrap {
+        padding: 14px 10px 14px;
+      }
+      .canvas {
+        padding: 14px;
+      }
+      .node-center {
+        min-width: 220px;
+        padding: 10px 16px 8px;
+      }
+      .note {
+        max-width: 190px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .canvas {
+        padding: 10px;
+      }
+      .subtitle {
+        font-size: 10px;
+      }
+      .note,
+      .node-center {
+        font-size: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header-kicker">Buckets/ · GovJAM</div>
+  <div class="title">Interpretation &amp; Problem Map</div>
+  <div class="subtitle">
+    Visualising the shared understanding of <strong>Buckets/</strong>:
+    bucket as purposeful container, “/” as movement and many.
+    Only interpretation and problem space — no solutions.
+  </div>
+
+  <div class="canvas" id="canvas">
+    <!-- dynamic edges -->
+    <svg id="edges" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+
+    <!-- CENTER: Bucket = Purpose / -->
+    <div
+      id="center"
+      class="node-center node-draggable"
+      data-x="50"
+      data-y="54">
+      <div class="node-center-label">Center</div>
+      <div class="node-center-main">Bucket = Purpose&nbsp; /</div>
+      <div class="node-center-note">
+        A purposeful container for a public cause. Bounded: we can see what goes in, what comes out, and what leaks.
+        “/” = many purposes, next steps, shifts between buckets, and the choice of which bucket to fill first.
+      </div>
+    </div>
+
+    <!-- CORE METAPHOR: Bucket = Purposeful container -->
+    <div
+      id="node-core-bucket"
+      class="note note-soft-yellow node-draggable"
+      data-x="26"
+      data-y="26">
+      <div class="note-label">Bucket = Purposeful Container</div>
+      <ul>
+        <li>Each bucket holds one focused cause or mission (safety, dignity, access, etc.).</li>
+        <li>Clear boundaries: inputs, outputs, and leaks are visible.</li>
+        <li>Problem: when buckets are vague, people do not trust or engage.</li>
+      </ul>
+    </div>
+
+    <!-- CORE METAPHOR: "/" = Many / next / shift -->
+    <div
+      id="node-core-slash"
+      class="note note-soft-pink node-draggable"
+      data-x="74"
+      data-y="26">
+      <div class="note-label">“/” = Many · Next · Shift</div>
+      <ul>
+        <li>Multiple purposes and parallel buckets.</li>
+        <li>Movement of learning from one bucket to the next.</li>
+        <li>Versioning: Bucket 1.0 → Bucket 2.0 (evolving public services).</li>
+        <li>Problem: unclear priorities on which bucket to fill first.</li>
+      </ul>
+    </div>
+
+    <!-- EVENT MECHANIC (fulFILL / reFILL) -->
+    <div
+      id="node-cycle"
+      class="note note-strong note-soft-blue node-draggable"
+      data-x="50"
+      data-y="22">
+      <div class="note-label">FulFILL / ReFILL Cycle</div>
+      <ul>
+        <li>Choose a bucket → name one clear public purpose.</li>
+        <li>Gather → people, skills, data, resources into that bucket.</li>
+        <li>FulFILL → run a concrete experiment or prototype.</li>
+        <li>Check leaks → see where effort is wasted or who is excluded.</li>
+        <li>ReFILL → refine, redistribute, replicate, or retire.</li>
+        <li>Slash → move to the next bucket carrying learning forward.</li>
+      </ul>
+    </div>
+
+    <!-- PUBLIC / SERVICE CONTEXT -->
+    <div
+      id="node-context"
+      class="note note-soft-mint node-draggable"
+      data-x="20"
+      data-y="44">
+      <div class="note-label">Public / Service Context</div>
+      <ul>
+        <li>Buckets can be underserved groups, services, journey stages, or priorities.</li>
+        <li>Problem: some buckets are always overflowing with attention; others are empty.</li>
+        <li>Question: can citizens co-own buckets instead of only receiving from them?</li>
+      </ul>
+    </div>
+
+    <!-- POWER & CHOICE -->
+    <div
+      id="node-power"
+      class="note note-soft-yellow node-draggable"
+      data-x="80"
+      data-y="40">
+      <div class="note-label">Power &amp; Choice</div>
+      <ul>
+        <li>Who decides which buckets exist and get filled?</li>
+        <li>Which buckets are always ignored or leaking?</li>
+        <li>Problem: decision power concentrated; neglected purposes stay invisible.</li>
+      </ul>
+    </div>
+
+    <!-- COMMUNITIES -->
+    <div
+      id="node-communities"
+      class="note note-soft-yellow node-draggable"
+      data-x="26"
+      data-y="34">
+      <div class="note-label">Communities</div>
+      <ul>
+        <li>Who is invited to fill each bucket?</li>
+        <li>Which communities never see their bucket named?</li>
+        <li>Problem: power gap between who speaks and who is affected.</li>
+      </ul>
+    </div>
+
+    <!-- GOVERNMENT & GOVERNANCE -->
+    <div
+      id="node-gov"
+      class="note note-soft-yellow node-draggable"
+      data-x="82"
+      data-y="50">
+      <div class="note-label">Government &amp; Governance</div>
+      <ul>
+        <li>Who defines official buckets and priorities?</li>
+        <li>How are neglected or leaking buckets surfaced?</li>
+        <li>Problem: unclear responsibility for empty or broken buckets.</li>
+      </ul>
+    </div>
+
+    <!-- PRIVACY & TERMS -->
+    <div
+      id="node-privacy"
+      class="note note-soft-pink node-draggable"
+      data-x="43"
+      data-y="32">
+      <div class="note-label">Privacy &amp; Terms</div>
+      <ul>
+        <li>What data flows into buckets (stories, details, identities)?</li>
+        <li>Are consent, terms, and boundaries understandable?</li>
+        <li>Problem: people may feel extracted instead of respected.</li>
+      </ul>
+    </div>
+
+    <!-- USABILITY -->
+    <div
+      id="node-usability"
+      class="note note-soft-blue node-draggable"
+      data-x="84"
+      data-y="30">
+      <div class="note-label">Usability</div>
+      <ul>
+        <li>Is a bucket’s purpose obvious at a glance?</li>
+        <li>Is entry simple for first-time participants?</li>
+        <li>Problem: cluttered or vague buckets lead to quiet drop-off.</li>
+      </ul>
+    </div>
+
+    <!-- ACCESSIBILITY & EQUITY -->
+    <div
+      id="node-access"
+      class="note note-soft-mint node-draggable"
+      data-x="24"
+      data-y="56">
+      <div class="note-label">Accessibility &amp; Equity</div>
+      <ul>
+        <li>Which buckets are always empty or underfilled?</li>
+        <li>Who cannot reach them (location, language, ability)?</li>
+        <li>Problem: structural gaps and invisible leaks.</li>
+      </ul>
+    </div>
+
+    <!-- TRACEABILITY & TRANSPARENCY -->
+    <div
+      id="node-trace"
+      class="note note-soft-mint node-draggable"
+      data-x="78"
+      data-y="60">
+      <div class="note-label">Traceability &amp; Transparency</div>
+      <ul>
+        <li>Can people see what goes into each bucket?</li>
+        <li>Can they see what comes out as outcomes?</li>
+        <li>Problem: lack of trace fuels distrust and disengagement.</li>
+      </ul>
+    </div>
+
+    <!-- OUTREACH & AWARENESS -->
+    <div
+      id="node-outreach"
+      class="note note-soft-blue node-draggable"
+      data-x="38"
+      data-y="76">
+      <div class="note-label">Outreach &amp; Awareness</div>
+      <ul>
+        <li>Do people even know these buckets exist?</li>
+        <li>Problem: important buckets stay hidden or misnamed.</li>
+      </ul>
+    </div>
+
+    <!-- ACTIVE RESULTS -->
+    <div
+      id="node-active"
+      class="note note-soft-blue node-draggable"
+      data-x="64"
+      data-y="76">
+      <div class="note-label">Active Results</div>
+      <ul>
+        <li>How often are buckets filled with talk, not change?</li>
+        <li>Problem: mismatch between announcements and lived impact.</li>
+      </ul>
+    </div>
+
+    <!-- GAMIFY & RECOGNITION -->
+    <div
+      id="node-gamify"
+      class="note note-soft-pink node-draggable"
+      data-x="46"
+      data-y="90">
+      <div class="note-label">Gamify &amp; Recognition</div>
+      <ul>
+        <li>How do we recognise people who help fill buckets?</li>
+        <li>Problem: shallow scoring can ignore real needs or labour.</li>
+      </ul>
+    </div>
+
+    <!-- COLLABORATION -->
+    <div
+      id="node-collab"
+      class="note note-soft-pink node-draggable"
+      data-x="56"
+      data-y="92">
+      <div class="note-label">Collaboration</div>
+      <ul>
+        <li>Multiple actors share the same bucket.</li>
+        <li>Problem: siloed buckets and duplicated efforts.</li>
+      </ul>
+    </div>
+
+    <!-- UNIFIED SYSTEM -->
+    <div
+      id="node-unified"
+      class="note note-soft-yellow node-draggable"
+      data-x="84"
+      data-y="72">
+      <div class="note-label">Unified System</div>
+      <ul>
+        <li>Today: scattered tools, forms, portals, events.</li>
+        <li>Problem: no single view of which buckets exist or how full they are.</li>
+      </ul>
+    </div>
+
+    <!-- METAPHORS & MISSED BUCKETS (existing only) -->
+    <div
+      id="node-metaphors"
+      class="note note-soft-yellow node-draggable"
+      data-x="18"
+      data-y="72">
+      <div class="note-label">Metaphors &amp; Missed Buckets</div>
+      <ul>
+        <li><strong>Biryani bucket</strong>: joy, culture, shared rituals.</li>
+        <li><strong>Sustainable toys</strong>: learning and reuse.</li>
+        <li><strong>Recycle bin</strong>: reuse of past efforts.</li>
+        <li><strong>Future vacuum</strong>: spaces nobody is filling.</li>
+        <li>Problem: these signals show imagined buckets that do not exist yet.</li>
+      </ul>
+    </div>
+
+    <!-- SYSTEM & BEHAVIOR HOOKS -->
+    <div
+      id="node-hooks"
+      class="note note-soft-mint node-draggable"
+      data-x="50"
+      data-y="64">
+      <div class="note-label">System &amp; Behavior Hooks</div>
+      <ul>
+        <li><strong>Equity</strong>: make neglected buckets visible.</li>
+        <li><strong>Transparency</strong>: show “what’s in the bucket now”.</li>
+        <li><strong>Incentives</strong>: meaningful recognition for filling together.</li>
+        <li><strong>Continuity</strong>: each event refills knowledge for the next.</li>
+      </ul>
+    </div>
+
+    <!-- FULFIL / REFILL / LEAKS (problem lens) -->
+    <div
+      id="node-fulfil"
+      class="note note-strong node-soft-blue node-draggable"
+      data-x="64"
+      data-y="18">
+      <div class="note-label">Fulfil / Refill / Leaks (Problem)</div>
+      <ul>
+        <li>Events briefly fill buckets; value fades after they end.</li>
+        <li>Leaks between cycles: learning, trust, and data are lost.</li>
+        <li>Problem: no continuity from one fill to the next.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const canvas = document.getElementById('canvas');
+    const edgesSvg = document.getElementById('edges');
+    const center = document.getElementById('center');
+    const nodes = Array.from(document.querySelectorAll('.node-draggable'));
+
+    if (!canvas || !edgesSvg || !center) return;
+
+    function applyInitialPositions() {
+      nodes.forEach(node => {
+        const x = parseFloat(node.getAttribute('data-x'));
+        const y = parseFloat(node.getAttribute('data-y'));
+        if (isNaN(x) || isNaN(y)) return;
+
+        node.style.left = x + '%';
+        node.style.top = y + '%';
+
+        if (node.id === 'center') {
+          node.style.transform = 'translate(-50%, -50%)';
+        } else {
+          node.style.transform = 'translate(-50%, -50%)';
+        }
+      });
+    }
+
+    function createEdges() {
+      edgesSvg.innerHTML = '';
+      const centerId = center.id;
+      nodes.forEach(node => {
+        if (node.id === centerId) return;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.classList.add('edge');
+        if (node.id === 'node-cycle' || node.id === 'node-fulfil') {
+          line.classList.add('edge-strong');
+        }
+        line.setAttribute('data-from', centerId);
+        line.setAttribute('data-to', node.id);
+        edgesSvg.appendChild(line);
+      });
+    }
+
+    function updateEdges() {
+      const canvasRect = canvas.getBoundingClientRect();
+      const viewW = canvasRect.width;
+      const viewH = canvasRect.height;
+
+      const centerRect = center.getBoundingClientRect();
+      const cx = (centerRect.left + centerRect.width / 2) - canvasRect.left;
+      const cy = (centerRect.top + centerRect.height / 2) - canvasRect.top;
+
+      const cxPct = (cx / viewW) * 100;
+      const cyPct = (cy / viewH) * 100;
+
+      const lines = edgesSvg.querySelectorAll('line');
+      lines.forEach(line => {
+        const toId = line.getAttribute('data-to');
+        const node = document.getElementById(toId);
+        if (!node) return;
+
+        const nr = node.getBoundingClientRect();
+        const nx = (nr.left + nr.width / 2) - canvasRect.left;
+        const ny = (nr.top + nr.height / 2) - canvasRect.top;
+
+        const nxPct = (nx / viewW) * 100;
+        const nyPct = (ny / viewH) * 100;
+
+        line.setAttribute('x1', cxPct);
+        line.setAttribute('y1', cyPct);
+        line.setAttribute('x2', nxPct);
+        line.setAttribute('y2', nyPct);
+      });
+    }
+
+    // Dragging
+
+    let active = null;
+    let startX = 0;
+    let startY = 0;
+    let originX = 0;
+    let originY = 0;
+
+    function pointerDown(e) {
+      const node = e.target.closest('.node-draggable');
+      if (!node) return;
+
+      active = node;
+      active.setPointerCapture(e.pointerId);
+
+      const canvasRect = canvas.getBoundingClientRect();
+      const nr = active.getBoundingClientRect();
+      const cx = (nr.left + nr.width / 2) - canvasRect.left;
+      const cy = (nr.top + nr.height / 2) - canvasRect.top;
+
+      originX = cx;
+      originY = cy;
+      startX = e.clientX;
+      startY = e.clientY;
+
+      active.style.zIndex = 10;
+      e.preventDefault();
+    }
+
+    function pointerMove(e) {
+      if (!active) return;
+
+      const canvasRect = canvas.getBoundingClientRect();
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      let cx = originX + dx;
+      let cy = originY + dy;
+
+      const margin = 26;
+      cx = Math.max(margin, Math.min(canvasRect.width - margin, cx));
+      cy = Math.max(margin, Math.min(canvasRect.height - margin, cy));
+
+      const px = (cx / canvasRect.width) * 100;
+      const py = (cy / canvasRect.height) * 100;
+
+      active.setAttribute('data-x', px.toFixed(2));
+      active.setAttribute('data-y', py.toFixed(2));
+      active.style.left = px + '%';
+      active.style.top = py + '%';
+      active.style.transform = 'translate(-50%, -50%)';
+
+      updateEdges();
+    }
+
+    function pointerUp(e) {
+      if (!active) return;
+      active.releasePointerCapture(e.pointerId);
+      active.style.zIndex = 3;
+      active = null;
+    }
+
+    canvas.addEventListener('pointerdown', pointerDown);
+    canvas.addEventListener('pointermove', pointerMove);
+    canvas.addEventListener('pointerup', pointerUp);
+    canvas.addEventListener('pointerleave', pointerUp);
+
+    // Init
+    applyInitialPositions();
+    createEdges();
+    updateEdges();
+    window.addEventListener('resize', () => {
+      applyInitialPositions();
+      updateEdges();
+    });
+  })();
+</script>
+</body>
+</html>

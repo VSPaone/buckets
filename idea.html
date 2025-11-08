@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Buckets/ - UNFILL · REFILL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    :root {
+      --bg: #f6f6f6;
+      --fg: #111111;
+      --muted: #8a8a8a;
+      --accent: #111111;
+      --border: #e3e3e3;
+      --radius: 16px;
+      --pad: 16px;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --transition-fast: 0.18s ease-out;
+
+      --reveal-bg-1: #ffffff;
+      --reveal-bg-2: #f6f6f6;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at top left, #ffffff, #f8f8f8),
+        linear-gradient(to bottom, #ffffff, #f6f6f6);
+      color: var(--fg);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 960px;
+      padding: 18px 16px 40px;
+      margin: 0 auto;
+    }
+
+    /* ------------ Header ------------ */
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding-bottom: 10px;
+    }
+
+    .brand-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .logo {
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .tagline {
+      font-size: 10px;
+      color: var(--muted);
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    .meta-block {
+      text-align: right;
+      font-size: 9px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      align-items: flex-end;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #ffffffee;
+      backdrop-filter: blur(4px);
+      font-size: 8px;
+      color: var(--muted);
+    }
+
+    .pill span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    /* ------------ Shell ------------ */
+
+    .shell {
+      margin-top: 4px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: var(--pad);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.03),
+        0 2px 10px rgba(0, 0, 0, 0.02);
+      background: #ffffff;
+      transition: background 0.6s var(--transition-fast);
+    }
+
+    /* ------------ Pre-Reveal ------------ */
+
+    .pre-reveal {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .pre-title {
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .pre-sub {
+      font-size: 11px;
+      color: var(--muted);
+      max-width: 420px;
+      line-height: 1.6;
+    }
+
+    .pre-sub strong {
+      color: var(--fg);
+      font-weight: 500;
+    }
+
+    .countdown-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 10px 10px 9px;
+      border-radius: 14px;
+      background: #111111;
+      color: #ffffff;
+    }
+
+    .countdown-label {
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 8px;
+    }
+
+    .countdown {
+      font-family: var(--font);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .progress-outer {
+      width: 100%;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+    }
+
+    .progress-inner {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: #ffffff;
+      transition: width 0.2s linear;
+    }
+
+    .reveal-note {
+      font-size: 8px;
+      opacity: 0.7;
+      text-align: right;
+    }
+
+    /* ------------ Revealed ------------ */
+
+    .revealed {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .title-block h2 {
+      margin: 4px 0 0;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .title-block p {
+      margin: 8px 0 0;
+      font-size: 10px;
+      color: #333333;
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    .twist {
+      margin-top: 4px;
+      font-size: 10px;
+      color: #111111;
+      font-weight: 500;
+    }
+
+    .section-label {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.1fr);
+      gap: 14px;
+    }
+
+    .card {
+      padding: 9px 9px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.94);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 9px;
+      line-height: 1.5;
+      backdrop-filter: blur(4px);
+    }
+
+    .card-title {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #333333;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 13px;
+      list-style: none;
+    }
+
+    ul li {
+      margin: 2px 0;
+      position: relative;
+      padding-left: 7px;
+    }
+
+    ul li::before {
+      content: "–";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--muted);
+    }
+
+    .flow-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 4px;
+      font-size: 8px;
+    }
+
+    .flow-pill {
+      padding: 4px 7px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f0f0ff;
+      color: #222222;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .flow-pill span.step {
+      font-size: 7px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .zones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .zone {
+      flex: 1 1 90px;
+      padding: 6px 7px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      font-size: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .zone span.label {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 7px;
+    }
+
+    .zone span.copy {
+      font-size: 8px;
+      color: #444444;
+    }
+
+    .zone.keep {
+      background: #e6f4ea;
+      border-color: #c8e6c9;
+    }
+
+    .zone.unfill {
+      background: #ffecec;
+      border-color: #ffcccc;
+    }
+
+    .zone.shift {
+      background: #eef3ff;
+      border-color: #c7d6ff;
+    }
+
+    .rituals {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .ritual {
+      padding: 7px 7px 6px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      font-size: 8px;
+      color: #444444;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .ritual span.heading {
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-size: 7px;
+      color: var(--muted);
+    }
+
+    .footnote {
+      font-size: 8px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .facilitator {
+      font-size: 8px;
+      color: #444444;
+      margin-top: 2px;
+      font-style: italic;
+    }
+
+    @media (max-width: 720px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .meta-block {
+        align-items: flex-start;
+        text-align: left;
+      }
+      .grid-two {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="brand-block">
+      <div class="logo">Buckets/</div>
+      <div class="tagline">
+        Something in our shared buckets is about to move.
+      </div>
+    </div>
+    <div class="meta-block">
+      <div class="pill">
+        <span class="dot"></span>
+        GovJam 2025 · Experiment
+      </div>
+      <div>Reveal: <strong>09:00 IST · 8 Nov 2025</strong></div>
+      <div>No app. No dashboard. Just a different way to carry weight.</div>
+    </div>
+  </header>
+
+  <div class="shell" id="shell">
+
+    <!-- PRE-REVEAL VIEW (CRYPTIC) -->
+    <div id="preReveal" class="pre-reveal">
+      <div class="pre-title">Count what you’re carrying, not what you’re adding.</div>
+      <div class="pre-sub">
+        A street-level ritual is coming.<br>
+        Real buckets. Real cards. One question:
+        <strong>What if progress starts by emptying?</strong>
+      </div>
+
+      <div class="countdown-wrap">
+        <div class="countdown-label">Time until the buckets speak</div>
+        <div id="countdown" class="countdown">Calculating…</div>
+        <div class="progress-outer">
+          <div id="progressBar" class="progress-inner"></div>
+        </div>
+        <div class="reveal-note">
+          When the timer hits zero, this page quietly turns itself inside out.
+        </div>
+      </div>
+    </div>
+
+    <!-- REVEALED GAME VIEW -->
+    <div id="revealed" class="revealed">
+      <div class="title-block">
+        <h1>UNFILL / REFILL</h1>
+        <h2>The Living Bucket Deck</h2>
+        <p>
+          A physical game for Buckets/. Every card comes from real buckets on real streets.
+          You don’t brainstorm problems. You face them - and decide what to keep, what to unfill, and what to move.
+        </p>
+        <div class="twist">
+          The only rule: no card is allowed to sit in silence.
+        </div>
+      </div>
+
+      <section>
+        <div class="section-label">How it’s born</div>
+        <div class="grid-two">
+          <div class="card">
+            <div class="card-title">Street Buckets & Traveling Cart</div>
+            <ul>
+              <li>Labeled buckets in public spaces invite handwritten notes: frictions, duties, leaks, quiet truths.</li>
+              <li>A traveling cart repeats this in places that never get a microphone.</li>
+              <li>Every slip stays human: no jargon washed over it.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">The Deck</div>
+            <ul>
+              <li>Collected notes are distilled into cards - each card = one real pattern or tension.</li>
+              <li>No fiction. No “imagined user”. Only what people actually poured in.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">How you play</div>
+        <div class="card">
+          <div class="card-title">The loop</div>
+          <div class="flow-strip">
+            <div class="flow-pill"><span class="step">1</span> Draw a card.</div>
+            <div class="flow-pill"><span class="step">2</span> Name who carries it now.</div>
+            <div class="flow-pill"><span class="step">3</span> Place it: KEEP / UNFILL / SHIFT.</div>
+            <div class="flow-pill"><span class="step">4</span> Write one clear sentence.</div>
+            <div class="flow-pill"><span class="step">5</span> Move on. No parking.</div>
+          </div>
+          <ul>
+            <li>Play with 4–8 people: teams, communities, departments, GovJam groups.</li>
+            <li>The power is not in the props - it’s in making every hidden weight visible and decided.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Three decision buckets</div>
+          <div class="zones">
+            <div class="zone keep">
+              <span class="label">Keep</span>
+              <span class="copy">We accept this weight. It matters. We state why and how we’ll own it.</span>
+            </div>
+            <div class="zone unfill">
+              <span class="label">Unfill</span>
+              <span class="copy">We stop, simplify, or release this. Emptying creates room for better work.</span>
+            </div>
+            <div class="zone shift">
+              <span class="label">Shift</span>
+              <span class="copy">This moves from the wrong hands to the right ones - closer to those affected.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">Rituals</div>
+        <div class="rituals">
+          <div class="ritual">
+            <span class="heading">Unfill Wall</span>
+            UNFILL cards are displayed then destroyed or archived in public - a visible choice to stop.
+          </div>
+          <div class="ritual">
+            <span class="heading">Shift Map</span>
+            SHIFT cards are redrawn as arrows from overloaded roles to new stewards.
+          </div>
+          <div class="ritual">
+            <span class="heading">Keep With Intent</span>
+            KEEP cards stay pinned with reasons, so “burden” becomes conscious duty.
+          </div>
+          <div class="ritual">
+            <span class="heading">The Chronicle</span>
+            Sessions feed a simple zine/poster: what this community chose to carry, drop, or move.
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-label">Why it fits Buckets/</div>
+        <div class="card">
+          <ul>
+            <li><strong>Buckets</strong> expose limits: you see what’s full, empty, or leaking.</li>
+            <li><strong>“/”</strong> is the shift: from adding more to deciding differently.</li>
+            <li>UNFILL / REFILL turns that into a repeatable, low-tech civic game.</li>
+            <li>You can run it with three boxes and printed cards. No app required.</li>
+          </ul>
+          <div class="footnote">
+            The game is a frame. The content is whatever your people drop into the buckets.
+          </div>
+          <div class="facilitator">
+            If you try it at GovJam, send photos of your three piles: KEEP / UNFILL / SHIFT.
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  // Reveal time: 9:00 AM, 8 Nov 2025 IST = 04:30 UTC
+  const revealTimestamp = Date.parse('2025-11-08T04:30:00Z');
+
+  // We'll treat 48 hours before reveal as 0% for the progress bar
+  const progressWindowMs = 48 * 60 * 60 * 1000;
+  const startProgress = revealTimestamp - progressWindowMs;
+
+  const pre = document.getElementById('preReveal');
+  const revealed = document.getElementById('revealed');
+  const countdownEl = document.getElementById('countdown');
+  const progressBar = document.getElementById('progressBar');
+  const shell = document.getElementById('shell');
+
+  function showRevealed() {
+    if (pre) pre.style.display = 'none';
+    if (revealed) revealed.style.display = 'flex';
+  }
+
+  function showPreReveal() {
+    if (pre) pre.style.display = 'flex';
+    if (revealed) revealed.style.display = 'none';
+  }
+
+  function updateCountdownAndProgress() {
+    const now = Date.now();
+
+    if (now >= revealTimestamp) {
+      showRevealed();
+      if (countdownEl) countdownEl.textContent = '00:00:00';
+      if (progressBar) progressBar.style.width = '100%';
+      return;
+    }
+
+    // Countdown
+    const diff = revealTimestamp - now;
+    const totalSeconds = Math.floor(diff / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    if (countdownEl) {
+      countdownEl.textContent =
+        String(hours).padStart(2, '0') + ':' +
+        String(minutes).padStart(2, '0') + ':' +
+        String(seconds).padStart(2, '0');
+    }
+
+    // Progress (0–100% within the 48h window)
+    let pct = 0;
+    if (now >= startProgress && now <= revealTimestamp) {
+      pct = ((now - startProgress) / (revealTimestamp - startProgress)) * 100;
+    } else if (now > revealTimestamp) {
+      pct = 100;
+    }
+    if (progressBar) {
+      progressBar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    }
+  }
+
+  function updateRevealBackground() {
+    const now = Date.now();
+    if (now < revealTimestamp) return;
+    if (!shell) return;
+
+    // After reveal: slowly drift background between two soft tones over time.
+    const cycleMs = 60 * 60 * 1000; // 1-hour color cycle
+    const t = ((now - revealTimestamp) % cycleMs) / cycleMs; // 0..1
+    // interpolate between two HSL-ish colors
+    const start = { r: 246, g: 246, b: 255 }; // light cool
+    const end   = { r: 255, g: 248, b: 240 }; // light warm
+
+    const r = Math.round(start.r + (end.r - start.r) * t);
+    const g = Math.round(start.g + (end.g - start.g) * t);
+    const b = Math.round(start.b + (end.b - start.b) * t);
+
+    shell.style.background = `linear-gradient(180deg, rgba(${r},${g},${b},0.98), #ffffff)`;
+  }
+
+  function tick() {
+    const now = Date.now();
+    if (now >= revealTimestamp) {
+      showRevealed();
+      updateRevealBackground();
+    } else {
+      showPreReveal();
+      updateCountdownAndProgress();
+    }
+  }
+
+  // Initial
+  if (Date.now() >= revealTimestamp) {
+    showRevealed();
+    updateRevealBackground();
+  } else {
+    showPreReveal();
+    updateCountdownAndProgress();
+  }
+
+  setInterval(() => {
+    updateCountdownAndProgress();
+    updateRevealBackground();
+  }, 1000);
+</script>
+</body>
+</html>
